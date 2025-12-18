@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Portfolio</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #f7f8fc;
+        color: #111827;
+        line-height: 1.5;
+      }
+
+      .container {
+        width: min(960px, 100%);
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+
+      /* Header: background color + centered text */
+      header {
+        background: #111827;
+        color: #ffffff;
+        text-align: center;
+        padding: 44px 0;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: 0.2px;
+      }
+
+      header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+        font-size: 1.05rem;
+      }
+
+      /* Sections: spacing, fonts, basic colors, margins/padding */
+      main {
+        padding: 22px 0 40px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px; /* padding */
+        margin: 14px 0; /* margin */
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+        color: #0f172a;
+      }
+
+      .muted {
+        color: #4b5563;
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 18px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+
+      .projects {
+        display: grid;
+        gap: 10px;
+      }
+
+      .project {
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fafafa;
+      }
+
+      .project h3 {
+        margin: 0 0 4px;
+        font-size: 1.05rem;
+      }
+
+      footer {
+        margin-top: 18px;
+        padding: 18px 0;
+        border-top: 1px solid #e5e7eb;
+        background: #ffffff;
+      }
+
+      footer .contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="container">
+        <h1>Ernest Prince Solomon</h1>
+        <p>Full stack software and AI developer • Building effective and efficient software solutions</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <section id="about">
+          <h2>About Me</h2>
+          <p class="muted">
+            I am a full stack software and AI developer skilled in both frontend and backend development.I enjoy creating effective and efficient software solutions,
+            by integrating AI with it, and I do work with DevOps tools and practices to ensure the software is deployed and maintained efficiently, And my favorite part is designing systems.
+          </p>
+        </section>
+
+        <section id="skills">
+          <h2>Skills</h2>
+          <ul>
+            <li>TailWind CSS</li>
+            <li>React</li>
+            <li>Express JS</li>
+            <li>Node JS</li>
+            <li>Next JS</li>
+            <li>MongoDB</li>
+            <li>PostgreSQL</li>
+            <li>NeonDB and Prisma</li>
+            <li>Docker</li>
+            <li>Event driven architecture</li>
+            <li>AI integration</li>
+            <li>Lang Chain</li>
+            <li>RAG piplines</li>
+            <li>Git and GitHub</li>
+          </ul>
+        </section>
+
+        <section id="projects">
+          <h2>Projects</h2>
+          <div class="projects">
+            <div class="project">
+              <h3>Project 1: AI helper Agent</h3>
+            </div>
+            <div class="project">
+              <h3>Project 2: AI image editor</h3>
+             
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="contact">
+          <div class="muted">Contact:</div>
+          <div>
+            Email:
+            <a href="mailto:you@example.com">190hp150nm@gmail.com</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
