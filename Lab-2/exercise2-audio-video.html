@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exercise 2: HTML5 Audio and Video</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #f6f7fb;
+        color: #111827;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 30px;
+        font-size: 1.5rem;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 1.2rem;
+      }
+
+      audio,
+      video {
+        width: 100%;
+        max-width: 100%;
+        margin: 10px 0;
+      }
+
+      video {
+        border-radius: 8px;
+      }
+
+      .time-display {
+        margin-top: 12px;
+        padding: 10px;
+        background: #f3f4f6;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 0.95rem;
+        color: #111827;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1> HTML5 Audio and Video</h1>
+
+      <section>
+        <h2>Audio Player</h2>
+        <audio id="audioPlayer" controls>
+          <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+        <div class="time-display" id="audioTime">
+          Current Time: 0:00 / Duration: 0:00
+        </div>
+      </section>
+
+      <section>
+        <h2>Video Player</h2>
+        <video id="videoPlayer" controls>
+          <source
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            type="video/mp4"
+          />
+          Your browser does not support the video element.
+        </video>
+        <div class="time-display" id="videoTime">
+          Current Time: 0:00 / Duration: 0:00
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const audioPlayer = document.getElementById("audioPlayer");
+      const videoPlayer = document.getElementById("videoPlayer");
+      const audioTimeDisplay = document.getElementById("audioTime");
+      const videoTimeDisplay = document.getElementById("videoTime");
+
+      function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+      }
+
+      // Audio player time updates
+      audioPlayer.addEventListener("loadedmetadata", () => {
+        audioTimeDisplay.textContent = `Current Time: ${formatTime(
+          audioPlayer.currentTime
+        )} / Duration: ${formatTime(audioPlayer.duration)}`;
+      });
+
+      audioPlayer.addEventListener("timeupdate", () => {
+        audioTimeDisplay.textContent = `Current Time: ${formatTime(
+          audioPlayer.currentTime
+        )} / Duration: ${formatTime(audioPlayer.duration)}`;
+      });
+
+      // Video player time updates
+      videoPlayer.addEventListener("loadedmetadata", () => {
+        videoTimeDisplay.textContent = `Current Time: ${formatTime(
+          videoPlayer.currentTime
+        )} / Duration: ${formatTime(videoPlayer.duration)}`;
+      });
+
+      videoPlayer.addEventListener("timeupdate", () => {
+        videoTimeDisplay.textContent = `Current Time: ${formatTime(
+          videoPlayer.currentTime
+        )} / Duration: ${formatTime(videoPlayer.duration)}`;
+      });
+    </script>
+  </body>
+</html>

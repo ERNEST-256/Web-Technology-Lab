@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exercise 4: Advanced LocalStorage User Management System</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #f6f7fb;
+        color: #111827;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 1.5rem;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 1.2rem;
+      }
+
+      .form-group {
+        margin: 16px 0;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+
+      input.error {
+        border-color: #ef4444;
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 140ms ease;
+        margin-right: 10px;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      button.danger {
+        background: #ef4444;
+      }
+
+      button.danger:hover {
+        background: #dc2626;
+      }
+
+      button.secondary {
+        background: #6b7280;
+      }
+
+      button.secondary:hover {
+        background: #4b5563;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      th {
+        background: #f3f4f6;
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background: #f9fafb;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+      }
+
+      .success-message {
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        color: #065f46;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Exercise 4: Advanced LocalStorage User Management System</h1>
+
+      <section id="registrationSection">
+        <h2>User Registration</h2>
+        <div class="success-message" id="successMessage">
+          User registered successfully!
+        </div>
+
+        <form id="registrationForm">
+          <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" name="name" required />
+            <div class="error-message" id="nameError">Name is required</div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required />
+            <div class="error-message" id="emailError">
+              Email is required and must be valid
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mobile">Mobile Number *</label>
+            <input type="tel" id="mobile" name="mobile" required />
+            <div class="error-message" id="mobileError">
+              Mobile number must be exactly 10 digits
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" name="password" required />
+            <div class="error-message" id="passwordError">
+              Password must be at least 6 characters
+            </div>
+          </div>
+
+          <button type="submit">Register User</button>
+        </form>
+      </section>
+
+      <section id="usersSection">
+        <h2>Registered Users</h2>
+        <div style="text-align: right; margin-bottom: 16px">
+          <button class="secondary" id="clearAllBtn">Clear All Users</button>
+        </div>
+        <div id="usersTableContainer">
+          <table id="usersTable" style="display: none">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile Number</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            No users registered yet. Register a user above.
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const registrationForm = document.getElementById("registrationForm");
+      const usersTable = document.getElementById("usersTable");
+      const usersTableBody = document.getElementById("usersTableBody");
+      const emptyState = document.getElementById("emptyState");
+      const clearAllBtn = document.getElementById("clearAllBtn");
+      const successMessage = document.getElementById("successMessage");
+
+      // Get users from localStorage
+      function getUsers() {
+        const usersJson = localStorage.getItem("users");
+        return usersJson ? JSON.parse(usersJson) : [];
+      }
+
+      // Save users to localStorage
+      function saveUsers(users) {
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+
+      // Validate form
+      function validateForm() {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const password = document.getElementById("password").value;
+
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll(".error-message").forEach((el) => {
+          el.classList.remove("show");
+        });
+        document.querySelectorAll("input").forEach((el) => {
+          el.classList.remove("error");
+        });
+
+        // Validate name
+        if (!name) {
+          document.getElementById("nameError").classList.add("show");
+          document.getElementById("name").classList.add("error");
+          isValid = false;
+        }
+
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          document.getElementById("emailError").classList.add("show");
+          document.getElementById("email").classList.add("error");
+          isValid = false;
+        }
+
+        // Validate mobile (10 digits)
+        const mobileRegex = /^\d{10}$/;
+        if (!mobile || !mobileRegex.test(mobile)) {
+          document.getElementById("mobileError").classList.add("show");
+          document.getElementById("mobile").classList.add("error");
+          isValid = false;
+        }
+
+        // Validate password (minimum 6 characters)
+        if (!password || password.length < 6) {
+          document.getElementById("passwordError").classList.add("show");
+          document.getElementById("password").classList.add("error");
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      // Check for duplicate email
+      function isDuplicateEmail(email) {
+        const users = getUsers();
+        return users.some((user) => user.email.toLowerCase() === email.toLowerCase());
+      }
+
+      // Display users table
+      function displayUsers() {
+        const users = getUsers();
+
+        if (users.length === 0) {
+          usersTable.style.display = "none";
+          emptyState.style.display = "block";
+          return;
+        }
+
+        usersTable.style.display = "table";
+        emptyState.style.display = "none";
+
+        usersTableBody.innerHTML = "";
+
+        users.forEach((user, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.mobile}</td>
+            <td>
+              <button class="danger" onclick="deleteUser(${index})">Delete</button>
+            </td>
+          `;
+          usersTableBody.appendChild(row);
+        });
+      }
+
+      // Delete user
+      window.deleteUser = function (index) {
+        if (confirm("Are you sure you want to delete this user?")) {
+          const users = getUsers();
+          users.splice(index, 1);
+          saveUsers(users);
+          displayUsers();
+        }
+      };
+
+      // Clear all users
+      clearAllBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to clear all users? This cannot be undone.")) {
+          localStorage.removeItem("users");
+          displayUsers();
+        }
+      });
+
+      // Form submission
+      registrationForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+          return;
+        }
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const password = document.getElementById("password").value;
+
+        // Check for duplicate email
+        if (isDuplicateEmail(email)) {
+          document.getElementById("emailError").textContent =
+            "This email is already registered";
+          document.getElementById("emailError").classList.add("show");
+          document.getElementById("email").classList.add("error");
+          return;
+        }
+
+        // Create user object
+        const user = {
+          name,
+          email,
+          mobile,
+          password, // In production, password should be hashed
+        };
+
+        // Save to localStorage
+        const users = getUsers();
+        users.push(user);
+        saveUsers(users);
+
+        // Show success message
+        successMessage.classList.add("show");
+        setTimeout(() => {
+          successMessage.classList.remove("show");
+        }, 3000);
+
+        // Reset form
+        registrationForm.reset();
+
+        // Update users table
+        displayUsers();
+      });
+
+      // Initial display
+      displayUsers();
+    </script>
+  </body>
+</html>
