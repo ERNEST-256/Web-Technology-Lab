@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Survey Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .survey-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .survey-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .question-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .question-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .question-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .form-field {
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .required-asterisk {
+            color: #d32f2f;
+        }
+
+        .field-valid {
+            border-color: #4CAF50 !important;
+        }
+
+        .field-invalid {
+            border-color: #d32f2f !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="survey-container">
+        <h1 class="survey-title">Customer Feedback Survey</h1>
+        <form id="surveyForm">
+            <div id="questionsContainer">
+                <!-- Questions will be dynamically generated here -->
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Survey</button>
+        </form>
+        <div class="success-message" id="successMessage">
+            Thank you for your feedback! Your survey has been submitted successfully.
+        </div>
+    </div>
+
+    <script>
+        // Survey questions data structure
+        const surveyQuestions = [
+            {
+                id: 'name',
+                type: 'text',
+                label: 'Full Name',
+                required: true,
+                validation: {
+                    minLength: 2,
+                    maxLength: 50
+                },
+                placeholder: 'Enter your full name'
+            },
+            {
+                id: 'email',
+                type: 'email',
+                label: 'Email Address',
+                required: true,
+                validation: {
+                    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                },
+                placeholder: 'Enter your email address'
+            },
+            {
+                id: 'age',
+                type: 'number',
+                label: 'Age',
+                required: true,
+                validation: {
+                    min: 18,
+                    max: 100
+                },
+                placeholder: 'Enter your age'
+            },
+            {
+                id: 'experience',
+                type: 'radio',
+                label: 'How would you rate your overall experience?',
+                required: true,
+                options: [
+                    { value: 'excellent', label: 'Excellent' },
+                    { value: 'good', label: 'Good' },
+                    { value: 'average', label: 'Average' },
+                    { value: 'poor', label: 'Poor' }
+                ]
+            },
+            {
+                id: 'services',
+                type: 'checkbox',
+                label: 'Which services have you used? (Select all that apply)',
+                required: true,
+                validation: {
+                    minSelections: 1,
+                    maxSelections: 3
+                },
+                options: [
+                    { value: 'web-design', label: 'Web Design' },
+                    { value: 'development', label: 'Development' },
+                    { value: 'consulting', label: 'Consulting' },
+                    { value: 'maintenance', label: 'Maintenance' }
+                ]
+            },
+            {
+                id: 'comments',
+                type: 'textarea',
+                label: 'Additional Comments',
+                required: false,
+                validation: {
+                    maxLength: 500
+                },
+                placeholder: 'Please share any additional comments or suggestions...'
+            },
+            {
+                id: 'recommend',
+                type: 'select',
+                label: 'Would you recommend our services?',
+                required: true,
+                options: [
+                    { value: '', label: 'Please select...' },
+                    { value: 'yes', label: 'Yes, definitely' },
+                    { value: 'maybe', label: 'Maybe' },
+                    { value: 'no', label: 'No' }
+                ]
+            }
+        ];
+
+        // DOM elements
+        const questionsContainer = document.getElementById('questionsContainer');
+        const surveyForm = document.getElementById('surveyForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+
+        // Initialize the survey
+        function initializeSurvey() {
+            generateQuestions();
+            setupEventListeners();
+        }
+
+        // Generate questions dynamically
+        function generateQuestions() {
+            surveyQuestions.forEach(question => {
+                const questionGroup = createQuestionGroup(question);
+                questionsContainer.appendChild(questionGroup);
+            });
+        }
+
+        // Create a question group element
+        function createQuestionGroup(question) {
+            const group = document.createElement('div');
+            group.className = 'question-group';
+            group.dataset.questionId = question.id;
+
+            const label = document.createElement('label');
+            label.className = 'question-label';
+            label.textContent = question.label;
+            if (question.required) {
+                label.innerHTML += ' <span class="required-asterisk">*</span>';
+            }
+            group.appendChild(label);
+
+            if (question.description) {
+                const desc = document.createElement('div');
+                desc.className = 'question-description';
+                desc.textContent = question.description;
+                group.appendChild(desc);
+            }
+
+            const fieldContainer = document.createElement('div');
+            fieldContainer.className = 'form-field';
+
+            switch (question.type) {
+                case 'text':
+                case 'email':
+                case 'number':
+                    fieldContainer.appendChild(createInputField(question));
+                    break;
+                case 'textarea':
+                    fieldContainer.appendChild(createTextareaField(question));
+                    break;
+                case 'radio':
+                    fieldContainer.appendChild(createRadioGroup(question));
+                    break;
+                case 'checkbox':
+                    fieldContainer.appendChild(createCheckboxGroup(question));
+                    break;
+                case 'select':
+                    fieldContainer.appendChild(createSelectField(question));
+                    break;
+            }
+
+            group.appendChild(fieldContainer);
+
+            const validationMsg = document.createElement('div');
+            validationMsg.className = 'validation-message';
+            validationMsg.id = `validation-${question.id}`;
+            group.appendChild(validationMsg);
+
+            return group;
+        }
+
+        // Create input field
+        function createInputField(question) {
+            const input = document.createElement('input');
+            input.type = question.type;
+            input.id = question.id;
+            input.name = question.id;
+            input.placeholder = question.placeholder || '';
+            input.required = question.required;
+
+            if (question.validation) {
+                if (question.validation.minLength) input.minLength = question.validation.minLength;
+                if (question.validation.maxLength) input.maxLength = question.validation.maxLength;
+                if (question.validation.min) input.min = question.validation.min;
+                if (question.validation.max) input.max = question.validation.max;
+            }
+
+            input.addEventListener('input', () => validateField(question.id));
+            input.addEventListener('blur', () => validateField(question.id));
+
+            return input;
+        }
+
+        // Create textarea field
+        function createTextareaField(question) {
+            const textarea = document.createElement('textarea');
+            textarea.id = question.id;
+            textarea.name = question.id;
+            textarea.placeholder = question.placeholder || '';
+
+            if (question.validation && question.validation.maxLength) {
+                textarea.maxLength = question.validation.maxLength;
+            }
+
+            textarea.addEventListener('input', () => validateField(question.id));
+            textarea.addEventListener('blur', () => validateField(question.id));
+
+            return textarea;
+        }
+
+        // Create radio button group
+        function createRadioGroup(question) {
+            const radioGroup = document.createElement('div');
+            radioGroup.className = 'radio-group';
+
+            question.options.forEach(option => {
+                const radioOption = document.createElement('div');
+                radioOption.className = 'radio-option';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.id = `${question.id}-${option.value}`;
+                radio.name = question.id;
+                radio.value = option.value;
+
+                const label = document.createElement('label');
+                label.htmlFor = `${question.id}-${option.value}`;
+                label.textContent = option.label;
+
+                radioOption.appendChild(radio);
+                radioOption.appendChild(label);
+                radioGroup.appendChild(radioOption);
+
+                radio.addEventListener('change', () => validateField(question.id));
+            });
+
+            return radioGroup;
+        }
+
+        // Create checkbox group
+        function createCheckboxGroup(question) {
+            const checkboxGroup = document.createElement('div');
+            checkboxGroup.className = 'checkbox-group';
+
+            question.options.forEach(option => {
+                const checkboxOption = document.createElement('div');
+                checkboxOption.className = 'checkbox-option';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `${question.id}-${option.value}`;
+                checkbox.name = question.id;
+                checkbox.value = option.value;
+
+                const label = document.createElement('label');
+                label.htmlFor = `${question.id}-${option.value}`;
+                label.textContent = option.label;
+
+                checkboxOption.appendChild(checkbox);
+                checkboxOption.appendChild(label);
+                checkboxGroup.appendChild(checkboxOption);
+
+                checkbox.addEventListener('change', () => validateField(question.id));
+            });
+
+            return checkboxGroup;
+        }
+
+        // Create select field
+        function createSelectField(question) {
+            const select = document.createElement('select');
+            select.id = question.id;
+            select.name = question.id;
+
+            question.options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.label;
+                select.appendChild(optionElement);
+            });
+
+            select.addEventListener('change', () => validateField(question.id));
+
+            return select;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            surveyForm.addEventListener('submit', handleFormSubmit);
+        }
+
+        // Validate a single field
+        function validateField(fieldId) {
+            const question = surveyQuestions.find(q => q.id === fieldId);
+            const fieldElement = document.getElementById(fieldId);
+            const validationMsg = document.getElementById(`validation-${fieldId}`);
+            const questionGroup = document.querySelector(`[data-question-id="${fieldId}"]`);
+
+            let isValid = true;
+            let message = '';
+
+            // Clear previous validation state
+            fieldElement.classList.remove('field-valid', 'field-invalid');
+            validationMsg.classList.remove('show');
+
+            switch (question.type) {
+                case 'text':
+                case 'email':
+                case 'number':
+                    isValid = validateTextField(question, fieldElement.value);
+                    if (!isValid.valid) {
+                        message = isValid.message;
+                    }
+                    break;
+                case 'textarea':
+                    isValid = validateTextareaField(question, fieldElement.value);
+                    if (!isValid.valid) {
+                        message = isValid.message;
+                    }
+                    break;
+                case 'radio':
+                    isValid = validateRadioField(question);
+                    if (!isValid.valid) {
+                        message = isValid.message;
+                    }
+                    break;
+                case 'checkbox':
+                    isValid = validateCheckboxField(question);
+                    if (!isValid.valid) {
+                        message = isValid.message;
+                    }
+                    break;
+                case 'select':
+                    isValid = validateSelectField(question);
+                    if (!isValid.valid) {
+                        message = isValid.message;
+                    }
+                    break;
+            }
+
+            if (isValid) {
+                fieldElement.classList.add('field-valid');
+            } else {
+                fieldElement.classList.add('field-invalid');
+                validationMsg.textContent = message;
+                validationMsg.classList.add('show');
+            }
+
+            updateSubmitButton();
+            return isValid;
+        }
+
+        // Validate text input field
+        function validateTextField(question, value) {
+            if (question.required && !value.trim()) {
+                return { valid: false, message: 'This field is required.' };
+            }
+
+            if (value.trim()) {
+                if (question.validation) {
+                    if (question.validation.minLength && value.length < question.validation.minLength) {
+                        return { valid: false, message: `Minimum ${question.validation.minLength} characters required.` };
+                    }
+                    if (question.validation.maxLength && value.length > question.validation.maxLength) {
+                        return { valid: false, message: `Maximum ${question.validation.maxLength} characters allowed.` };
+                    }
+                    if (question.validation.pattern && !question.validation.pattern.test(value)) {
+                        return { valid: false, message: 'Please enter a valid format.' };
+                    }
+                    if (question.type === 'number') {
+                        const num = parseFloat(value);
+                        if (question.validation.min && num < question.validation.min) {
+                            return { valid: false, message: `Value must be at least ${question.validation.min}.` };
+                        }
+                        if (question.validation.max && num > question.validation.max) {
+                            return { valid: false, message: `Value must be at most ${question.validation.max}.` };
+                        }
+                    }
+                }
+            }
+
+            return { valid: true };
+        }
+
+        // Validate textarea field
+        function validateTextareaField(question, value) {
+            if (question.required && !value.trim()) {
+                return { valid: false, message: 'This field is required.' };
+            }
+
+            if (value.trim() && question.validation && question.validation.maxLength && value.length > question.validation.maxLength) {
+                return { valid: false, message: `Maximum ${question.validation.maxLength} characters allowed.` };
+            }
+
+            return { valid: true };
+        }
+
+        // Validate radio button field
+        function validateRadioField(question) {
+            const checkedRadio = document.querySelector(`input[name="${question.id}"]:checked`);
+            if (question.required && !checkedRadio) {
+                return { valid: false, message: 'Please select an option.' };
+            }
+            return { valid: true };
+        }
+
+        // Validate checkbox field
+        function validateCheckboxField(question) {
+            const checkedBoxes = document.querySelectorAll(`input[name="${question.id}"]:checked`);
+            if (question.required && checkedBoxes.length === 0) {
+                return { valid: false, message: 'Please select at least one option.' };
+            }
+
+            if (question.validation) {
+                if (question.validation.minSelections && checkedBoxes.length < question.validation.minSelections) {
+                    return { valid: false, message: `Please select at least ${question.validation.minSelections} option(s).` };
+                }
+                if (question.validation.maxSelections && checkedBoxes.length > question.validation.maxSelections) {
+                    return { valid: false, message: `Please select at most ${question.validation.maxSelections} option(s).` };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        // Validate select field
+        function validateSelectField(question) {
+            const select = document.getElementById(question.id);
+            if (question.required && (!select.value || select.value === '')) {
+                return { valid: false, message: 'Please select an option.' };
+            }
+            return { valid: true };
+        }
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const allValid = surveyQuestions.every(question => {
+                return validateField(question.id);
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+
+        // Handle form submission
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            // Validate all fields
+            const allValid = surveyQuestions.every(question => {
+                return validateField(question.id);
+            });
+
+            if (!allValid) {
+                // Scroll to first invalid field
+                const firstInvalid = document.querySelector('.field-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // Collect form data
+            const formData = new FormData(surveyForm);
+            const surveyResults = {};
+
+            for (let [key, value] of formData.entries()) {
+                if (surveyResults[key]) {
+                    if (Array.isArray(surveyResults[key])) {
+                        surveyResults[key].push(value);
+                    } else {
+                        surveyResults[key] = [surveyResults[key], value];
+                    }
+                } else {
+                    surveyResults[key] = value;
+                }
+            }
+
+            // Show success message
+            surveyForm.style.display = 'none';
+            successMessage.style.display = 'block';
+
+            // Log results (in a real application, this would be sent to a server)
+            console.log('Survey Results:', surveyResults);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeSurvey);
+    </script>
+</body>
+</html>

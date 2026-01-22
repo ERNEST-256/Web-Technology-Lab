@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time User Activity Monitor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .interactive-area {
+            flex: 1;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .activity-log {
+            flex: 1;
+            padding: 30px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .interactive-section {
+            margin-bottom: 30px;
+        }
+
+        .interactive-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .interactive-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 236, 210, 0.3);
+        }
+
+        .input-area {
+            margin-bottom: 20px;
+        }
+
+        .input-area input,
+        .input-area textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-area input:focus,
+        .input-area textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-area textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .log-title {
+            font-size: 1.5em;
+            color: #495057;
+            margin: 0;
+        }
+
+        .log-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-container {
+            flex: 1;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .log-entries {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 0;
+        }
+
+        .log-entry {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .log-entry:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .activity-click {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .activity-keypress {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .activity-focus {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .activity-scroll {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .activity-resize {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .log-details {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .log-timestamp {
+            color: #6c757d;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .log-description {
+            color: #495057;
+            margin-bottom: 2px;
+        }
+
+        .log-target {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .warning-alert {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: 1px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .warning-alert.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .warning-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .thresholds-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .thresholds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .threshold-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .threshold-label {
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .threshold-input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .clear-logs {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .clear-logs:hover {
+            background-color: #c82333 !important;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .interactive-area {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .log-stats {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .interactive-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" id="statusIndicator" title="Activity Monitor Active"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Real-Time User Activity Monitor</h1>
+            <p>Track clicks, key presses, and focus events in real-time</p>
+        </div>
+
+        <div class="main-content">
+            <div class="interactive-area">
+                <div class="thresholds-section">
+                    <h3>⚙️ Activity Thresholds</h3>
+                    <div class="thresholds-grid">
+                        <div class="threshold-item">
+                            <label class="threshold-label">Max Clicks/Minute:</label>
+                            <input type="number" class="threshold-input" id="clickThreshold" value="50" min="1">
+                        </div>
+                        <div class="threshold-item">
+                            <label class="threshold-label">Max Key Presses/Minute:</label>
+                            <input type="number" class="threshold-input" id="keypressThreshold" value="200" min="1">
+                        </div>
+                        <div class="threshold-item">
+                            <label class="threshold-label">Max Focus Changes/Minute:</label>
+                            <input type="number" class="threshold-input" id="focusThreshold" value="30" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-alert" id="warningAlert">
+                    <div class="warning-title">⚠️ Suspicious Activity Detected!</div>
+                    <div id="warningMessage">High activity levels detected. Please slow down.</div>
+                </div>
+
+                <div class="interactive-section">
+                    <h3>🎯 Interactive Elements</h3>
+                    <div class="interactive-buttons">
+                        <button class="btn btn-primary" id="btn1">Click Me!</button>
+                        <button class="btn btn-secondary" id="btn2">Press Here</button>
+                        <button class="btn btn-success" id="btn3">Interact</button>
+                        <button class="btn btn-warning" id="btn4">Test Button</button>
+                    </div>
+
+                    <div class="input-area">
+                        <input type="text" id="textInput" placeholder="Type something here... (keypresses will be tracked)">
+                        <br><br>
+                        <textarea id="textArea" placeholder="Try typing in this textarea..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-log">
+                <div class="log-header">
+                    <h2 class="log-title">📋 Activity Log</h2>
+                    <div class="log-controls">
+                        <button class="btn btn-primary" id="exportBtn">📤 Export Log</button>
+                        <button class="btn clear-logs" id="clearBtn">🗑️ Clear Log</button>
+                    </div>
+                </div>
+
+                <div class="log-container">
+                    <div class="log-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="totalActivities">0</span>
+                            <span>Total Activities</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="clicksCount">0</span>
+                            <span>Clicks</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="keypressCount">0</span>
+                            <span>Key Presses</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="focusCount">0</span>
+                            <span>Focus Changes</span>
+                        </div>
+                    </div>
+
+                    <div class="log-entries" id="logEntries">
+                        <div class="log-entry">
+                            <div class="activity-icon activity-click">🎯</div>
+                            <div class="log-details">
+                                <div class="log-timestamp">Monitor initialized - waiting for activity...</div>
+                                <div class="log-description">Activity monitor is now tracking user interactions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Activity Monitor Class
+        class ActivityMonitor {
+            constructor() {
+                this.activities = [];
+                this.thresholds = {
+                    clicks: 50,
+                    keypresses: 200,
+                    focus: 30
+                };
+                this.counters = {
+                    clicks: 0,
+                    keypresses: 0,
+                    focus: 0,
+                    total: 0
+                };
+                this.lastReset = Date.now();
+
+                this.initializeElements();
+                this.setupEventListeners();
+                this.startPeriodicReset();
+            }
+
+            initializeElements() {
+                this.logEntries = document.getElementById('logEntries');
+                this.warningAlert = document.getElementById('warningAlert');
+                this.warningMessage = document.getElementById('warningMessage');
+                this.exportBtn = document.getElementById('exportBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+
+                // Threshold inputs
+                this.clickThresholdInput = document.getElementById('clickThreshold');
+                this.keypressThresholdInput = document.getElementById('keypressThreshold');
+                this.focusThresholdInput = document.getElementById('focusThreshold');
+
+                // Stats displays
+                this.totalActivities = document.getElementById('totalActivities');
+                this.clicksCount = document.getElementById('clicksCount');
+                this.keypressCount = document.getElementById('keypressCount');
+                this.focusCount = document.getElementById('focusCount');
+            }
+
+            setupEventListeners() {
+                // Click events - using capturing and bubbling
+                document.addEventListener('click', (e) => this.handleClick(e), true); // capturing
+                document.addEventListener('click', (e) => this.handleClick(e), false); // bubbling
+
+                // Keypress events
+                document.addEventListener('keypress', (e) => this.handleKeypress(e), true);
+                document.addEventListener('keypress', (e) => this.handleKeypress(e), false);
+
+                // Focus events
+                document.addEventListener('focusin', (e) => this.handleFocus(e), true);
+                document.addEventListener('focusin', (e) => this.handleFocus(e), false);
+                document.addEventListener('focusout', (e) => this.handleFocus(e), true);
+                document.addEventListener('focusout', (e) => this.handleFocus(e), false);
+
+                // Additional events for comprehensive monitoring
+                document.addEventListener('scroll', (e) => this.handleScroll(e), { passive: true });
+                window.addEventListener('resize', (e) => this.handleResize(e));
+
+                // Threshold input changes
+                this.clickThresholdInput.addEventListener('change', (e) => {
+                    this.thresholds.clicks = parseInt(e.target.value) || 50;
+                });
+                this.keypressThresholdInput.addEventListener('change', (e) => {
+                    this.thresholds.keypresses = parseInt(e.target.value) || 200;
+                });
+                this.focusThresholdInput.addEventListener('change', (e) => {
+                    this.thresholds.focus = parseInt(e.target.value) || 30;
+                });
+
+                // Control buttons
+                this.exportBtn.addEventListener('click', () => this.exportLog());
+                this.clearBtn.addEventListener('click', () => this.clearLog());
+            }
+
+            handleClick(event) {
+                const target = this.getTargetInfo(event.target);
+                const activity = {
+                    type: 'click',
+                    timestamp: new Date(),
+                    target: target,
+                    eventPhase: event.eventPhase === 1 ? 'capturing' : event.eventPhase === 2 ? 'target' : 'bubbling',
+                    coordinates: {
+                        x: event.clientX,
+                        y: event.clientY
+                    },
+                    button: event.button,
+                    ctrlKey: event.ctrlKey,
+                    shiftKey: event.shiftKey,
+                    altKey: event.altKey
+                };
+
+                this.addActivity(activity);
+                this.counters.clicks++;
+                this.checkThresholds();
+            }
+
+            handleKeypress(event) {
+                const target = this.getTargetInfo(event.target);
+                const activity = {
+                    type: 'keypress',
+                    timestamp: new Date(),
+                    target: target,
+                    eventPhase: event.eventPhase === 1 ? 'capturing' : event.eventPhase === 2 ? 'target' : 'bubbling',
+                    key: event.key,
+                    code: event.code,
+                    ctrlKey: event.ctrlKey,
+                    shiftKey: event.shiftKey,
+                    altKey: event.altKey,
+                    metaKey: event.metaKey
+                };
+
+                this.addActivity(activity);
+                this.counters.keypresses++;
+                this.checkThresholds();
+            }
+
+            handleFocus(event) {
+                const target = this.getTargetInfo(event.target);
+                const activity = {
+                    type: 'focus',
+                    timestamp: new Date(),
+                    target: target,
+                    eventPhase: event.eventPhase === 1 ? 'capturing' : event.eventPhase === 2 ? 'target' : 'bubbling',
+                    eventType: event.type,
+                    relatedTarget: event.relatedTarget ? this.getTargetInfo(event.relatedTarget) : null
+                };
+
+                this.addActivity(activity);
+                this.counters.focus++;
+                this.checkThresholds();
+            }
+
+            handleScroll(event) {
+                // Only log scroll events occasionally to avoid spam
+                if (Math.random() < 0.1) { // 10% chance to log
+                    const target = this.getTargetInfo(event.target);
+                    const activity = {
+                        type: 'scroll',
+                        timestamp: new Date(),
+                        target: target,
+                        scrollTop: event.target.scrollTop || window.pageYOffset,
+                        scrollLeft: event.target.scrollLeft || window.pageXOffset
+                    };
+
+                    this.addActivity(activity);
+                }
+            }
+
+            handleResize(event) {
+                const activity = {
+                    type: 'resize',
+                    timestamp: new Date(),
+                    target: { tagName: 'WINDOW', id: '', className: '' },
+                    newSize: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    }
+                };
+
+                this.addActivity(activity);
+            }
+
+            getTargetInfo(element) {
+                if (!element) return { tagName: 'UNKNOWN', id: '', className: '' };
+
+                return {
+                    tagName: element.tagName || 'UNKNOWN',
+                    id: element.id || '',
+                    className: element.className || '',
+                    textContent: element.textContent ? element.textContent.substring(0, 50) : ''
+                };
+            }
+
+            addActivity(activity) {
+                this.activities.push(activity);
+                this.counters.total++;
+
+                // Keep only last 100 activities in memory for performance
+                if (this.activities.length > 100) {
+                    this.activities = this.activities.slice(-100);
+                }
+
+                this.updateDisplay();
+                this.updateStats();
+            }
+
+            checkThresholds() {
+                const timeElapsed = (Date.now() - this.lastReset) / 1000 / 60; // minutes
+                const clicksPerMinute = this.counters.clicks / timeElapsed;
+                const keypressesPerMinute = this.counters.keypresses / timeElapsed;
+                const focusPerMinute = this.counters.focus / timeElapsed;
+
+                let warningMessage = '';
+                let showWarning = false;
+
+                if (clicksPerMinute > this.thresholds.clicks) {
+                    warningMessage += `High click rate: ${clicksPerMinute.toFixed(1)} clicks/min (threshold: ${this.thresholds.clicks})<br>`;
+                    showWarning = true;
+                }
+
+                if (keypressesPerMinute > this.thresholds.keypresses) {
+                    warningMessage += `High keypress rate: ${keypressesPerMinute.toFixed(1)} presses/min (threshold: ${this.thresholds.keypresses})<br>`;
+                    showWarning = true;
+                }
+
+                if (focusPerMinute > this.thresholds.focus) {
+                    warningMessage += `High focus change rate: ${focusPerMinute.toFixed(1)} changes/min (threshold: ${this.thresholds.focus})<br>`;
+                    showWarning = true;
+                }
+
+                if (showWarning) {
+                    this.warningMessage.innerHTML = warningMessage;
+                    this.warningAlert.classList.add('show');
+
+                    // Auto-hide warning after 5 seconds
+                    setTimeout(() => {
+                        this.warningAlert.classList.remove('show');
+                    }, 5000);
+                }
+            }
+
+            startPeriodicReset() {
+                // Reset counters every minute to check thresholds properly
+                setInterval(() => {
+                    this.counters = {
+                        clicks: 0,
+                        keypresses: 0,
+                        focus: 0,
+                        total: this.counters.total // Keep total cumulative
+                    };
+                    this.lastReset = Date.now();
+                }, 60000); // 1 minute
+            }
+
+            updateDisplay() {
+                const recentActivities = this.activities.slice(-10); // Show last 10 activities
+
+                this.logEntries.innerHTML = recentActivities.map(activity => {
+                    const iconClass = `activity-${activity.type}`;
+                    const timestamp = activity.timestamp.toLocaleTimeString();
+                    const description = this.getActivityDescription(activity);
+
+                    return `
+                        <div class="log-entry">
+                            <div class="activity-icon ${iconClass}">${this.getActivityIcon(activity.type)}</div>
+                            <div class="log-details">
+                                <div class="log-timestamp">${timestamp} (${activity.eventPhase || 'direct'})</div>
+                                <div class="log-description">${description}</div>
+                                <div class="log-target">Target: ${activity.target.tagName}${activity.target.id ? '#' + activity.target.id : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Auto-scroll to bottom
+                this.logEntries.scrollTop = this.logEntries.scrollHeight;
+            }
+
+            getActivityIcon(type) {
+                const icons = {
+                    click: '👆',
+                    keypress: '⌨️',
+                    focus: '👁️',
+                    scroll: '📜',
+                    resize: '📐'
+                };
+                return icons[type] || '📝';
+            }
+
+            getActivityDescription(activity) {
+                switch (activity.type) {
+                    case 'click':
+                        return `Mouse click at (${activity.coordinates.x}, ${activity.coordinates.y})`;
+                    case 'keypress':
+                        return `Key pressed: "${activity.key}" (${activity.code})`;
+                    case 'focus':
+                        return `${activity.eventType === 'focusin' ? 'Focused on' : 'Focus left'} element`;
+                    case 'scroll':
+                        return `Scrolled to position (${activity.scrollLeft}, ${activity.scrollTop})`;
+                    case 'resize':
+                        return `Window resized to ${activity.newSize.width}×${activity.newSize.height}`;
+                    default:
+                        return 'Unknown activity';
+                }
+            }
+
+            updateStats() {
+                this.totalActivities.textContent = this.counters.total;
+                this.clicksCount.textContent = this.counters.clicks;
+                this.keypressCount.textContent = this.counters.keypresses;
+                this.focusCount.textContent = this.counters.focus;
+            }
+
+            exportLog() {
+                const formattedLog = this.formatLogForExport();
+                const blob = new Blob([formattedLog], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `activity-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            formatLogForExport() {
+                let log = `ACTIVITY MONITOR LOG - Generated on ${new Date().toLocaleString()}\n`;
+                log += '=' .repeat(80) + '\n\n';
+                log += `Total Activities Recorded: ${this.counters.total}\n`;
+                log += `Current Session: ${this.counters.clicks} clicks, ${this.counters.keypresses} keypresses, ${this.counters.focus} focus changes\n\n`;
+                log += 'THRESHOLDS:\n';
+                log += `  - Max Clicks/Minute: ${this.thresholds.clicks}\n`;
+                log += `  - Max Keypresses/Minute: ${this.thresholds.keypresses}\n`;
+                log += `  - Max Focus Changes/Minute: ${this.thresholds.focus}\n\n`;
+                log += 'ACTIVITY DETAILS:\n';
+                log += '-' .repeat(80) + '\n\n';
+
+                this.activities.forEach((activity, index) => {
+                    log += `${index + 1}. [${activity.timestamp.toLocaleString()}] ${activity.type.toUpperCase()}\n`;
+                    log += `   Phase: ${activity.eventPhase || 'direct'}\n`;
+                    log += `   Target: ${activity.target.tagName}${activity.target.id ? '#' + activity.target.id : ''}`;
+                    if (activity.target.className) log += ` .${activity.target.className}`;
+                    log += '\n';
+
+                    switch (activity.type) {
+                        case 'click':
+                            log += `   Position: (${activity.coordinates.x}, ${activity.coordinates.y})\n`;
+                            if (activity.ctrlKey || activity.shiftKey || activity.altKey) {
+                                log += `   Modifiers: ${activity.ctrlKey ? 'Ctrl ' : ''}${activity.shiftKey ? 'Shift ' : ''}${activity.altKey ? 'Alt ' : ''}\n`;
+                            }
+                            break;
+                        case 'keypress':
+                            log += `   Key: "${activity.key}" (code: ${activity.code})\n`;
+                            if (activity.ctrlKey || activity.shiftKey || activity.altKey || activity.metaKey) {
+                                log += `   Modifiers: ${activity.ctrlKey ? 'Ctrl ' : ''}${activity.shiftKey ? 'Shift ' : ''}${activity.altKey ? 'Alt ' : ''}${activity.metaKey ? 'Meta ' : ''}\n`;
+                            }
+                            break;
+                        case 'focus':
+                            log += `   Event: ${activity.eventType}\n`;
+                            if (activity.relatedTarget) {
+                                log += `   Related Target: ${activity.relatedTarget.tagName}${activity.relatedTarget.id ? '#' + activity.relatedTarget.id : ''}\n`;
+                            }
+                            break;
+                        case 'scroll':
+                            log += `   Scroll Position: (${activity.scrollLeft}, ${activity.scrollTop})\n`;
+                            break;
+                        case 'resize':
+                            log += `   New Size: ${activity.newSize.width}×${activity.newSize.height}\n`;
+                            break;
+                    }
+                    log += '\n';
+                });
+
+                return log;
+            }
+
+            clearLog() {
+                if (confirm('Are you sure you want to clear all activity logs? This action cannot be undone.')) {
+                    this.activities = [];
+                    this.counters = {
+                        clicks: 0,
+                        keypresses: 0,
+                        focus: 0,
+                        total: 0
+                    };
+                    this.updateDisplay();
+                    this.updateStats();
+                    this.warningAlert.classList.remove('show');
+                }
+            }
+        }
+
+        // Initialize the activity monitor when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new ActivityMonitor();
+        });
+    </script>
+</body>
+</html>
