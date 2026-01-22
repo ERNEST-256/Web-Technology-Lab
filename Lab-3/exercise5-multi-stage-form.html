@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Stage Form Workflow Engine</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .progress-container {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+
+        .step.completed:not(:last-child)::after {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .step.completed .step-circle {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .step.completed .step-label {
+            color: #28a745;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-stage {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-stage.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stage-title {
+            font-size: 1.8em;
+            color: #495057;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group .required {
+            color: #dc3545;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak {
+            background-color: #dc3545;
+            width: 33%;
+        }
+
+        .strength-medium {
+            background-color: #ffc107;
+            width: 66%;
+        }
+
+        .strength-strong {
+            background-color: #28a745;
+            width: 100%;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .review-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .review-section h3 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 1.2em;
+        }
+
+        .review-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .review-value {
+            color: #6c757d;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .nav-btn:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-previous {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+            .progress-steps {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .step {
+                flex: none;
+                min-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Multi-Stage Form Workflow</h1>
+            <p>Complete each stage to proceed to the next</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Personal Info</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Address</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Account Setup</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Review & Submit</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="multiStageForm">
+            <div class="form-container">
+                <!-- Stage 1: Personal Information -->
+                <div class="form-stage active" id="stage1">
+                    <h2 class="stage-title">👤 Personal Information</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter your first name">
+                            <div class="error-message" id="firstNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter your last name">
+                            <div class="error-message" id="lastNameError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address">
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="(123) 456-7890">
+                            <div class="error-message" id="phoneError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+                            <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
+                            <div class="error-message" id="dateOfBirthError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 2: Address Information -->
+                <div class="form-stage" id="stage2">
+                    <h2 class="stage-title">🏠 Address Information</h2>
+
+                    <div class="form-group">
+                        <label for="streetAddress">Street Address <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="streetAddress" name="streetAddress" placeholder="Enter your street address">
+                        <div class="error-message" id="streetAddressError"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="city" name="city" placeholder="Enter your city">
+                            <div class="error-message" id="cityError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State <span class="required">*</span></label>
+                            <select class="form-control" id="state" name="state">
+                                <option value="">Select State</option>
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                            </select>
+                            <div class="error-message" id="stateError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zipCode">ZIP Code <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="12345" maxlength="5">
+                        <div class="error-message" id="zipCodeError"></div>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Account Setup -->
+                <div class="form-stage" id="stage3">
+                    <h2 class="stage-title">🔐 Account Setup</h2>
+
+                    <div class="form-group">
+                        <label for="username">Username <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username">
+                        <div class="error-message" id="usernameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password <span class="required">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password">
+                        <div class="password-strength">
+                            <div class="password-strength-fill" id="passwordStrength"></div>
+                        </div>
+                        <div class="password-hint" id="passwordHint">Password must be at least 8 characters long</div>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password">
+                        <div class="error-message" id="confirmPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="securityQuestion">Security Question <span class="required">*</span></label>
+                        <select class="form-control" id="securityQuestion" name="securityQuestion">
+                            <option value="">Select a security question</option>
+                            <option value="pet">What was the name of your first pet?</option>
+                            <option value="school">What was the name of your first school?</option>
+                            <option value="city">What city were you born in?</option>
+                            <option value="mother">What is your mother's maiden name?</option>
+                            <option value="color">What is your favorite color?</option>
+                        </select>
+                        <div class="error-message" id="securityQuestionError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="securityAnswer">Security Answer <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="securityAnswer" name="securityAnswer" placeholder="Enter your answer">
+                        <div class="error-message" id="securityAnswerError"></div>
+                    </div>
+                </div>
+
+                <!-- Stage 4: Review & Submit -->
+                <div class="form-stage" id="stage4">
+                    <h2 class="stage-title">📋 Review & Submit</h2>
+                    <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">Please review your information before submitting</p>
+
+                    <div class="review-section">
+                        <h3>👤 Personal Information</h3>
+                        <div class="review-item">
+                            <span class="review-label">Full Name:</span>
+                            <span class="review-value" id="reviewName"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Email:</span>
+                            <span class="review-value" id="reviewEmail"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Phone:</span>
+                            <span class="review-value" id="reviewPhone"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Date of Birth:</span>
+                            <span class="review-value" id="reviewDob"></span>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <h3>🏠 Address Information</h3>
+                        <div class="review-item">
+                            <span class="review-label">Street Address:</span>
+                            <span class="review-value" id="reviewAddress"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">City:</span>
+                            <span class="review-value" id="reviewCity"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">State:</span>
+                            <span class="review-value" id="reviewState"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">ZIP Code:</span>
+                            <span class="review-value" id="reviewZip"></span>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <h3>🔐 Account Information</h3>
+                        <div class="review-item">
+                            <span class="review-label">Username:</span>
+                            <span class="review-value" id="reviewUsername"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Security Question:</span>
+                            <span class="review-value" id="reviewSecurityQuestion"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Security Answer:</span>
+                            <span class="review-value" id="reviewSecurityAnswer"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn btn-previous" id="prevBtn" style="display: none;">← Previous</button>
+                    <button type="button" class="nav-btn btn-next" id="nextBtn">Next →</button>
+                    <button type="submit" class="nav-btn btn-submit" id="submitBtn" style="display: none;">Submit Form</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h3>Registration Complete!</h3>
+            <p>Your information has been successfully submitted.</p>
+        </div>
+    </div>
+
+    <script>
+        // Multi-Stage Form Workflow Engine
+        class FormWorkflow {
+            constructor() {
+                this.currentStage = 1;
+                this.totalStages = 4;
+                this.formData = {};
+
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateUI();
+            }
+
+            initializeElements() {
+                // Form stages
+                this.stages = {
+                    1: document.getElementById('stage1'),
+                    2: document.getElementById('stage2'),
+                    3: document.getElementById('stage3'),
+                    4: document.getElementById('stage4')
+                };
+
+                // Navigation buttons
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.submitBtn = document.getElementById('submitBtn');
+
+                // Progress elements
+                this.progressFill = document.getElementById('progressFill');
+                this.stepElements = document.querySelectorAll('.step');
+
+                // Form and success message
+                this.form = document.getElementById('multiStageForm');
+                this.successMessage = document.getElementById('successMessage');
+
+                // Password strength elements
+                this.passwordStrength = document.getElementById('passwordStrength');
+                this.passwordHint = document.getElementById('passwordHint');
+            }
+
+            setupEventListeners() {
+                // Navigation buttons
+                this.prevBtn.addEventListener('click', () => this.goToPreviousStage());
+                this.nextBtn.addEventListener('click', () => this.goToNextStage());
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+                // Real-time validation for Stage 3 password
+                document.getElementById('password').addEventListener('input', (e) => {
+                    this.checkPasswordStrength(e.target.value);
+                    // Re-validate confirm password when original password changes
+                    this.validateConfirmPassword();
+                });
+
+                // Real-time validation for confirm password
+                document.getElementById('confirmPassword').addEventListener('input', () => this.validateConfirmPassword());
+            }
+
+            goToNextStage() {
+                console.log('Attempting to go to next stage from stage', this.currentStage);
+                const isValid = this.validateCurrentStage();
+                console.log('Stage validation result:', isValid);
+                if (isValid) {
+                    this.saveCurrentStageData();
+                    if (this.currentStage < this.totalStages) {
+                        this.currentStage++;
+                        console.log('Moving to stage', this.currentStage);
+                        this.updateUI();
+                    }
+                } else {
+                    console.log('Validation failed, cannot proceed to next stage');
+                }
+            }
+
+            goToPreviousStage() {
+                if (this.currentStage > 1) {
+                    this.currentStage--;
+                    this.updateUI();
+                }
+            }
+
+            validateCurrentStage() {
+                let isValid = true;
+
+                switch (this.currentStage) {
+                    case 1:
+                        isValid = this.validateStage1();
+                        break;
+                    case 2:
+                        isValid = this.validateStage2();
+                        break;
+                    case 3:
+                        isValid = this.validateStage3();
+                        break;
+                    case 4:
+                        isValid = true; // Review stage is always valid
+                        break;
+                }
+
+                return isValid;
+            }
+
+            validateStage1() {
+                const fields = [
+                    { id: 'firstName', required: true, pattern: /^[a-zA-Z\s]+$/, message: 'First name is required and should contain only letters' },
+                    { id: 'lastName', required: true, pattern: /^[a-zA-Z\s]+$/, message: 'Last name is required and should contain only letters' },
+                    { id: 'email', required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address' },
+                    { id: 'phone', required: true, custom: (value) => {
+                        // Accept both formatted (123) 456-7890 and unformatted 1234567890
+                        const cleanPhone = value.replace(/\D/g, '');
+                        return cleanPhone.length === 10;
+                    }, message: 'Please enter a valid 10-digit phone number' },
+                    { id: 'dateOfBirth', required: true, custom: (value) => {
+                        if (!value) return false;
+                        const today = new Date();
+                        const birthDate = new Date(value);
+                        const age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff = today.getMonth() - birthDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        return age >= 13 && age <= 120 && birthDate <= today;
+                    }, message: 'You must be at least 13 years old and date cannot be in the future' }
+                ];
+
+                return this.validateFields(fields);
+            }
+
+            validateStage2() {
+                const fields = [
+                    { id: 'streetAddress', required: true, minLength: 5, message: 'Street address is required (minimum 5 characters)' },
+                    { id: 'city', required: true, pattern: /^[a-zA-Z\s]+$/, message: 'City is required and should contain only letters' },
+                    { id: 'state', required: true, custom: (value) => value && value !== '', message: 'Please select a state' },
+                    { id: 'zipCode', required: true, pattern: /^\d{5}$/, message: 'Please enter a valid 5-digit ZIP code' }
+                ];
+
+                return this.validateFields(fields);
+            }
+
+            validateStage3() {
+                const fields = [
+                    { id: 'username', required: true, pattern: /^[a-zA-Z0-9_]{3,20}$/, message: 'Username must be 3-20 characters and contain only letters, numbers, and underscores' },
+                    { id: 'password', required: true, custom: (value) => this.isPasswordStrong(value), message: 'Password does not meet strength requirements' },
+                    { id: 'confirmPassword', required: true, custom: (value) => value === document.getElementById('password').value, message: 'Passwords do not match' },
+                    { id: 'securityQuestion', required: true, custom: (value) => value && value !== '', message: 'Please select a security question' },
+                    { id: 'securityAnswer', required: true, minLength: 2, message: 'Security answer is required (minimum 2 characters)' }
+                ];
+
+                return this.validateFields(fields);
+            }
+
+            validateFields(fields) {
+                let allValid = true;
+                console.log('Validating fields:', fields.map(f => f.id));
+
+                fields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    const errorElement = document.getElementById(field.id + 'Error');
+                    let isValid = true;
+                    let message = '';
+
+                    const value = element.value.trim();
+                    console.log(`Validating ${field.id}: "${value}"`);
+
+                    // Check required
+                    if (field.required && !value) {
+                        isValid = false;
+                        message = field.message || 'This field is required';
+                        console.log(`${field.id} failed: required field is empty`);
+                    }
+                    // Check pattern
+                    else if (field.pattern && value && !field.pattern.test(value)) {
+                        isValid = false;
+                        message = field.message;
+                        console.log(`${field.id} failed: pattern validation`);
+                    }
+                    // Check minimum length
+                    else if (field.minLength && value && value.length < field.minLength) {
+                        isValid = false;
+                        message = field.message;
+                        console.log(`${field.id} failed: minimum length`);
+                    }
+                    // Check custom validation
+                    else if (field.custom && !field.custom(value)) {
+                        isValid = false;
+                        message = field.message;
+                        console.log(`${field.id} failed: custom validation`);
+                    } else {
+                        console.log(`${field.id} passed validation`);
+                    }
+
+                    // Update UI
+                    if (isValid) {
+                        element.classList.remove('error');
+                        errorElement.classList.remove('show');
+                    } else {
+                        element.classList.add('error');
+                        errorElement.textContent = message;
+                        errorElement.classList.add('show');
+                        allValid = false;
+                    }
+                });
+
+                console.log('All fields valid:', allValid);
+                return allValid;
+            }
+
+            isPasswordStrong(password) {
+                if (password.length < 8) return false;
+
+                let requirements = 0;
+                if (/[a-z]/.test(password)) requirements++; // lowercase
+                if (/[A-Z]/.test(password)) requirements++; // uppercase
+                if (/\d/.test(password)) requirements++; // number
+                if (/[@$!%*?&]/.test(password)) requirements++; // special character
+
+                // Need at least 3 out of 4 requirements
+                return requirements >= 3;
+            }
+
+            checkPasswordStrength(password) {
+                let requirements = 0;
+                let hints = [];
+
+                if (password.length >= 8) {
+                    requirements++;
+                } else {
+                    hints.push('At least 8 characters');
+                }
+
+                if (/[a-z]/.test(password)) requirements++;
+                else hints.push('One lowercase letter');
+
+                if (/[A-Z]/.test(password)) requirements++;
+                else hints.push('One uppercase letter');
+
+                if (/\d/.test(password)) requirements++;
+                else hints.push('One number');
+
+                if (/[@$!%*?&]/.test(password)) requirements++;
+                else hints.push('One special character (@$!%*?&)');
+
+                // Update UI based on requirements met (need 3 out of 4 + length)
+                this.passwordStrength.className = 'password-strength-fill';
+                if (requirements < 2) {
+                    this.passwordStrength.classList.add('strength-weak');
+                } else if (requirements < 4) {
+                    this.passwordStrength.classList.add('strength-medium');
+                } else {
+                    this.passwordStrength.classList.add('strength-strong');
+                }
+
+                this.passwordHint.textContent = hints.length > 0 ? 'Password requirements: ' + hints.join(', ') : 'Strong password! (3 out of 4 criteria met)';
+
+                // Validate confirm password if it exists
+                this.validateConfirmPassword();
+            }
+
+            validateConfirmPassword() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const errorElement = document.getElementById('confirmPasswordError');
+                const element = document.getElementById('confirmPassword');
+
+                if (confirmPassword && password !== confirmPassword) {
+                    element.classList.add('error');
+                    errorElement.textContent = 'Passwords do not match';
+                    errorElement.classList.add('show');
+                } else {
+                    element.classList.remove('error');
+                    errorElement.classList.remove('show');
+                }
+            }
+
+            saveCurrentStageData() {
+                const stageFields = {
+                    1: ['firstName', 'lastName', 'email', 'phone', 'dateOfBirth'],
+                    2: ['streetAddress', 'city', 'state', 'zipCode'],
+                    3: ['username', 'password', 'securityQuestion', 'securityAnswer'],
+                    4: [] // Review stage doesn't have new fields
+                };
+
+                stageFields[this.currentStage].forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    this.formData[fieldId] = element.value;
+                });
+            }
+
+            updateUI() {
+                // Update stage visibility
+                Object.values(this.stages).forEach(stage => stage.classList.remove('active'));
+                this.stages[this.currentStage].classList.add('active');
+
+                // Update progress bar
+                const progress = ((this.currentStage - 1) / (this.totalStages - 1)) * 100;
+                this.progressFill.style.width = progress + '%';
+
+                // Update step indicators
+                this.stepElements.forEach((step, index) => {
+                    const stepNumber = index + 1;
+                    step.classList.remove('active', 'completed');
+
+                    if (stepNumber === this.currentStage) {
+                        step.classList.add('active');
+                    } else if (stepNumber < this.currentStage) {
+                        step.classList.add('completed');
+                    }
+                });
+
+                // Update navigation buttons
+                this.prevBtn.style.display = this.currentStage > 1 ? 'block' : 'none';
+                this.nextBtn.style.display = this.currentStage < this.totalStages ? 'block' : 'none';
+                this.submitBtn.style.display = this.currentStage === this.totalStages ? 'block' : 'none';
+
+                // Update review data if on stage 4
+                if (this.currentStage === 4) {
+                    this.updateReviewData();
+                }
+            }
+
+            updateReviewData() {
+                // Personal Information
+                document.getElementById('reviewName').textContent = this.formData.firstName + ' ' + this.formData.lastName;
+                document.getElementById('reviewEmail').textContent = this.formData.email;
+                document.getElementById('reviewPhone').textContent = this.formData.phone;
+                document.getElementById('reviewDob').textContent = new Date(this.formData.dateOfBirth).toLocaleDateString();
+
+                // Address Information
+                document.getElementById('reviewAddress').textContent = this.formData.streetAddress;
+                document.getElementById('reviewCity').textContent = this.formData.city;
+                document.getElementById('reviewState').textContent = this.getStateName(this.formData.state);
+                document.getElementById('reviewZip').textContent = this.formData.zipCode;
+
+                // Account Information
+                document.getElementById('reviewUsername').textContent = this.formData.username;
+                document.getElementById('reviewSecurityQuestion').textContent = this.getSecurityQuestionText(this.formData.securityQuestion);
+                document.getElementById('reviewSecurityAnswer').textContent = this.formData.securityAnswer;
+            }
+
+            getStateName(stateCode) {
+                const states = {
+                    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+                    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+                    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+                    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+                    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+                    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+                    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+                    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+                    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+                    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+                };
+                return states[stateCode] || stateCode;
+            }
+
+            getSecurityQuestionText(questionValue) {
+                const questions = {
+                    'pet': 'What was the name of your first pet?',
+                    'school': 'What was the name of your first school?',
+                    'city': 'What city were you born in?',
+                    'mother': 'What is your mother\'s maiden name?',
+                    'color': 'What is your favorite color?'
+                };
+                return questions[questionValue] || questionValue;
+            }
+
+            handleSubmit(event) {
+                event.preventDefault();
+
+                if (this.validateCurrentStage()) {
+                    // Hide form and show success message
+                    this.form.style.display = 'none';
+                    this.successMessage.style.display = 'block';
+
+                    // Log form data (in a real application, this would be sent to a server)
+                    console.log('Form submitted with data:', this.formData);
+
+                    // Scroll to top to show success message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Initialize the form workflow when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Format phone number as user types
+            document.getElementById('phone').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 10) {
+                    value = value.substring(0, 10);
+                    e.target.value = `(${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6)}`;
+                }
+            });
+
+            // Initialize form workflow
+            new FormWorkflow();
+        });
+    </script>
+</body>
+</html>
