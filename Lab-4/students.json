@@ -1,0 +1,9 @@
+{
+  "students": [
+    { "id": 1, "studentId": "S001", "name": "Alice Johnson", "department": "Computer Science", "marks": 85 },
+    { "id": 2, "studentId": "S002", "name": "Bob Smith", "department": "Electronics", "marks": 72 },
+    { "id": 3, "studentId": "S003", "name": "Carol Williams", "department": "Mechanical", "marks": 91 },
+    { "id": 4, "studentId": "S004", "name": "David Brown", "department": "Computer Science", "marks": 68 },
+    { "id": 5, "studentId": "S005", "name": "Eva Davis", "department": "Civil", "marks": 78 }
+  ]
+}

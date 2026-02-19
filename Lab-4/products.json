@@ -1,0 +1,19 @@
+{
+  "products": [
+    { "id": 1, "name": "Wireless Bluetooth Headphones", "price": 49.99, "category": "Electronics" },
+    { "id": 2, "name": "Laptop Stand Aluminum", "price": 34.99, "category": "Accessories" },
+    { "id": 3, "name": "Mechanical Keyboard RGB", "price": 89.99, "category": "Electronics" },
+    { "id": 4, "name": "USB-C Hub 7-in-1", "price": 45.00, "category": "Accessories" },
+    { "id": 5, "name": "Organic Cotton T-Shirt", "price": 24.99, "category": "Clothing" },
+    { "id": 6, "name": "Running Shoes Lightweight", "price": 79.99, "category": "Clothing" },
+    { "id": 7, "name": "Smart Watch Fitness", "price": 129.99, "category": "Electronics" },
+    { "id": 8, "name": "Desk Lamp LED", "price": 29.99, "category": "Home" },
+    { "id": 9, "name": "Coffee Maker programmable", "price": 59.99, "category": "Home" },
+    { "id": 10, "name": "Backpack Laptop 15 inch", "price": 54.99, "category": "Accessories" },
+    { "id": 11, "name": "Wireless Mouse Ergonomic", "price": 32.99, "category": "Electronics" },
+    { "id": 12, "name": "Yoga Mat Non-Slip", "price": 22.99, "category": "Sports" },
+    { "id": 13, "name": "Water Bottle Insulated", "price": 19.99, "category": "Accessories" },
+    { "id": 14, "name": "Bluetooth Speaker Portable", "price": 39.99, "category": "Electronics" },
+    { "id": 15, "name": "Winter Jacket Waterproof", "price": 119.99, "category": "Clothing" }
+  ]
+}
