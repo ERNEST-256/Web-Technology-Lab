@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 2: Library Book Tracker (XML DOM)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+        .header p { opacity: 0.9; font-size: 0.9rem; }
+
+        .form-section {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: end;
+        }
+
+        @media (max-width: 720px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #15803d;
+            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: #15803d; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #166534; transform: translateY(-1px); }
+        .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
+
+        .btn-secondary { background: #e5e7eb; color: #374151; }
+        .btn-secondary:hover { background: #d1d5db; }
+
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+        .status-available { color: #15803d; font-weight: 600; }
+        .status-checked-out { color: #b91c1c; font-weight: 600; }
+
+        .table-section { padding: 24px; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f0fdf4;
+            font-weight: 600;
+            color: #166534;
+            font-size: 0.875rem;
+        }
+
+        tr:hover td { background: #f0fdf4; }
+
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .message {
+            margin: 0 24px 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.visible { display: block; }
+        .message.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .message.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .empty-state { text-align: center; padding: 40px; color: #6b7280; }
+
+        .note { font-size: 0.75rem; color: #6b7280; text-align: center; padding: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Library Book Tracker</h1>
+           
+        </div>
+
+        <div class="form-section">
+            <form id="bookForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="bookId">Book ID</label>
+                        <input type="text" id="bookId" name="bookId" placeholder="e.g. B001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" placeholder="Book title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author</label>
+                        <input type="text" id="author" name="author" placeholder="Author name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="availability">Availability</label>
+                        <select id="availability" name="availability">
+                            <option value="Available">Available</option>
+                            <option value="Checked Out">Checked Out</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" id="addBtn">Add Book</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="message" class="message" role="alert"></div>
+
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" class="empty-state">Loading books...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById('bookForm');
+            var tableBody = document.getElementById('tableBody');
+            var messageEl = document.getElementById('message');
+            var bookIdInput = document.getElementById('bookId');
+            var titleInput = document.getElementById('title');
+            var authorInput = document.getElementById('author');
+            var availabilityInput = document.getElementById('availability');
+
+            var xmlDoc = null;
+            var root = null;
+
+            var VALID_STATUSES = ['Available', 'Checked Out'];
+
+            function showMessage(text, isError) {
+                messageEl.textContent = text;
+                messageEl.className = 'message visible ' + (isError ? 'error' : 'success');
+                setTimeout(function () { messageEl.classList.remove('visible'); }, 4000);
+            }
+
+            function getTextFromEl(parent, tagName) {
+                var el = parent.getElementsByTagName(tagName)[0];
+                return el ? (el.textContent || '').trim() : '';
+            }
+
+            function findBookNodeById(bookId) {
+                if (!root) return null;
+                var books = root.getElementsByTagName('book');
+                for (var i = 0; i <books.length; i++) {
+                    var idEl = books[i].getElementsByTagName('bookId')[0];
+                    if (idEl && (idEl.textContent || '').trim() === bookId) return books[i];
+                }
+                return null;
+            }
+
+            function loadBooks() {
+                tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Loading...</td></tr>';
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'books.xml', true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState !== 4) return;
+                    if (xhr.status !== 200) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Failed to load books.xml.</td></tr>';
+                        showMessage('Error loading books.xml.', true);
+                        return;
+                    }
+                    var doc = xhr.responseXML;
+                    if (!doc || !doc.documentElement) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Invalid XML.</td></tr>';
+                        showMessage('Invalid or empty XML.', true);
+                        return;
+                    }
+                    xmlDoc = doc.cloneNode(true);
+                    root = xmlDoc.documentElement;
+                    if (!root || root.nodeName.toLowerCase() !== 'books') {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Invalid root element.</td></tr>';
+                        showMessage('Invalid XML structure.', true);
+                        return;
+                    }
+                    refreshBookList();
+                };
+                xhr.onerror = function () {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Network error.</td></tr>';
+                    showMessage('Network error loading books.xml.', true);
+                };
+                xhr.send();
+            }
+
+            function refreshBookList() {
+                if (!root) return;
+                var bookNodes = root.getElementsByTagName('book');
+                tableBody.innerHTML = '';
+                if (bookNodes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">No books. Add one above.</td></tr>';
+                    return;
+                }
+                for (var i = 0; i < bookNodes.length; i++) {
+                    var book = bookNodes[i];
+                    var bid = getTextFromEl(book, 'bookId');
+                    var title = getTextFromEl(book, 'title');
+                    var author = getTextFromEl(book, 'author');
+                    var avail = getTextFromEl(book, 'availability');
+                    var tr = document.createElement('tr');
+                    tr.setAttribute('data-book-id', bid);
+                    var statusClass = avail === 'Available' ? 'status-available' : 'status-checked-out';
+                    tr.innerHTML =
+                        '<td>' + escapeHtml(bid) + '</td>' +
+                        '<td>' + escapeHtml(title) + '</td>' +
+                        '<td>' + escapeHtml(author) + '</td>' +
+                        '<td><span class="' + statusClass + '">' + escapeHtml(avail) + '</span></td>' +
+                        '<td><div class="actions">' +
+                        '<button type="button" class="btn btn-secondary btn-sm toggle-btn">Toggle Status</button>' +
+                        '<button type="button" class="btn btn-danger btn-sm delete-btn">Delete</button>' +
+                        '</div></td>';
+                    tableBody.appendChild(tr);
+                }
+                tableBody.querySelectorAll('.toggle-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var bid = btn.closest('tr').getAttribute('data-book-id');
+                        toggleAvailability(bid);
+                    });
+                });
+                tableBody.querySelectorAll('.delete-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var bid = btn.closest('tr').getAttribute('data-book-id');
+                        if (confirm('Remove this book from the list?')) deleteBook(bid);
+                    });
+                });
+            }
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text == null ? '' : String(text);
+                return div.innerHTML;
+            }
+
+            function validateAdd(bookId, title, author, availability) {
+                if (!bookId || !title.trim() || !author.trim()) {
+                    showMessage('Book ID, Title, and Author are required.', true);
+                    return false;
+                }
+                if (VALID_STATUSES.indexOf(availability) === -1) {
+                    showMessage('Invalid availability status.', true);
+                    return false;
+                }
+                if (findBookNodeById(bookId)) {
+                    showMessage('A book with this Book ID already exists.', true);
+                    return false;
+                }
+                return true;
+            }
+
+            function addBook() {
+                var bookId = bookIdInput.value.trim();
+                var title = titleInput.value.trim();
+                var author = authorInput.value.trim();
+                var availability = availabilityInput.value;
+                if (!validateAdd(bookId, title, author, availability)) return;
+
+                var bookEl = xmlDoc.createElement('book');
+                var bookIdEl = xmlDoc.createElement('bookId');
+                bookIdEl.textContent = bookId;
+                var titleEl = xmlDoc.createElement('title');
+                titleEl.textContent = title;
+                var authorEl = xmlDoc.createElement('author');
+                authorEl.textContent = author;
+                var availEl = xmlDoc.createElement('availability');
+                availEl.textContent = availability;
+                bookEl.appendChild(bookIdEl);
+                bookEl.appendChild(titleEl);
+                bookEl.appendChild(authorEl);
+                bookEl.appendChild(availEl);
+                root.appendChild(bookEl);
+
+                showMessage('Book added successfully.', false);
+                form.reset();
+                refreshBookList();
+            }
+
+            function toggleAvailability(bookId) {
+                var bookNode = findBookNodeById(bookId);
+                if (!bookNode) {
+                    showMessage('Book not found.', true);
+                    refreshBookList();
+                    return;
+                }
+                var availEl = bookNode.getElementsByTagName('availability')[0];
+                if (!availEl) return;
+                var current = (availEl.textContent || '').trim();
+                availEl.textContent = current === 'Available' ? 'Checked Out' : 'Available';
+                showMessage('Availability updated.', false);
+                refreshBookList();
+            }
+
+            function deleteBook(bookId) {
+                var bookNode = findBookNodeById(bookId);
+                if (!bookNode) {
+                    showMessage('Book not found.', true);
+                    refreshBookList();
+                    return;
+                }
+                root.removeChild(bookNode);
+                showMessage('Book removed successfully.', false);
+                refreshBookList();
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                addBook();
+            });
+
+            loadBooks();
+        })();
+    </script>
+</body>
+</html>

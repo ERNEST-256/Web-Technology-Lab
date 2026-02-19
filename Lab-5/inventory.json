@@ -1,0 +1,10 @@
+{
+  "products": [
+    { "productId": "P001", "name": "Wireless Mouse", "category": "Electronics", "price": 29.99, "stockQuantity": 45 },
+    { "productId": "P002", "name": "USB-C Hub", "category": "Accessories", "price": 45.00, "stockQuantity": 3 },
+    { "productId": "P003", "name": "Mechanical Keyboard", "category": "Electronics", "price": 89.99, "stockQuantity": 12 },
+    { "productId": "P004", "name": "Laptop Stand", "category": "Accessories", "price": 34.99, "stockQuantity": 2 },
+    { "productId": "P005", "name": "Bluetooth Headphones", "category": "Electronics", "price": 59.99, "stockQuantity": 28 },
+    { "productId": "P006", "name": "Desk Lamp LED", "category": "Home", "price": 39.99, "stockQuantity": 5 }
+  ]
+}
