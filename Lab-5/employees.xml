@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees>
+  <employee>
+    <employeeId>E001</employeeId>
+    <name>Alice Johnson</name>
+    <department>Engineering</department>
+    <salary>75000</salary>
+  </employee>
+  <employee>
+    <employeeId>E002</employeeId>
+    <name>Bob Smith</name>
+    <department>Marketing</department>
+    <salary>62000</salary>
+  </employee>
+  <employee>
+    <employeeId>E003</employeeId>
+    <name>Carol Williams</name>
+    <department>Engineering</department>
+    <salary>82000</salary>
+  </employee>
+  <employee>
+    <employeeId>E004</employeeId>
+    <name>David Brown</name>
+    <department>HR</department>
+    <salary>58000</salary>
+  </employee>
+  <employee>
+    <employeeId>E005</employeeId>
+    <name>Eva Davis</name>
+    <department>Sales</department>
+    <salary>67000</salary>
+  </employee>
+</employees>

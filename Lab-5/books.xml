@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+  <book>
+    <bookId>B001</bookId>
+    <title>The Great Gatsby</title>
+    <author>F. Scott Fitzgerald</author>
+    <availability>Available</availability>
+  </book>
+  <book>
+    <bookId>B002</bookId>
+    <title>To Kill a Mockingbird</title>
+    <author>Harper Lee</author>
+    <availability>Checked Out</availability>
+  </book>
+  <book>
+    <bookId>B003</bookId>
+    <title>1984</title>
+    <author>George Orwell</author>
+    <availability>Available</availability>
+  </book>
+  <book>
+    <bookId>B004</bookId>
+    <title>Pride and Prejudice</title>
+    <author>Jane Austen</author>
+    <availability>Available</availability>
+  </book>
+  <book>
+    <bookId>B005</bookId>
+    <title>The Catcher in the Rye</title>
+    <author>J.D. Salinger</author>
+    <availability>Checked Out</availability>
+  </book>
+</books>
