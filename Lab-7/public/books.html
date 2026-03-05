@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Online Book Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f9fafb;
+        color: #111827;
+      }
+
+      header {
+        background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        color: #ffffff;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      header p {
+        margin: 0.25rem 0 0;
+        opacity: 0.95;
+      }
+
+      main {
+        max-width: 1040px;
+        margin: 1.5rem auto 2rem;
+        padding: 0 1rem;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.1fr);
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        padding: 1.25rem 1.5rem;
+      }
+
+      .card h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.15rem;
+      }
+
+      .controls-group {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .inline-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4b5563;
+      }
+
+      input[type='text'],
+      select {
+        padding: 0.4rem 0.55rem;
+        border-radius: 0.5rem;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        min-width: 0;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      input[type='text']:focus,
+      select:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+
+      button {
+        border-radius: 999px;
+        border: none;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.05s ease,
+          box-shadow 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      button.primary {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4);
+      }
+
+      button.primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
+
+      button.ghost {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      button.ghost:hover {
+        background: #d1d5db;
+      }
+
+      button.chip {
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding-inline: 0.85rem;
+      }
+
+      button.chip:hover {
+        background: #dbeafe;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        background: #eef2ff;
+        color: #4338ca;
+        font-weight: 500;
+      }
+
+      .books-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .books-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 0.9rem;
+      }
+
+      .book {
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 0.9rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .book-title {
+        font-weight: 600;
+      }
+
+      .book-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+
+      .book-footer {
+        margin-top: 0.35rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+      }
+
+      .rating {
+        color: #ca8a04;
+        font-weight: 600;
+      }
+
+      .price {
+        font-weight: 600;
+        color: #0f766e;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-top: 0.25rem;
+      }
+
+      .pagination {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .pagination span {
+        font-size: 0.85rem;
+        color: #4b5563;
+      }
+
+      @media (max-width: 800px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding-inline: 1.25rem;
+        }
+
+        main {
+          padding-inline: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Online Book Finder</h1>
+      <p>
+        Search, filter, sort and browse books stored in MongoDB using different
+        query operations.
+      </p>
+    </header>
+
+    <main>
+      <div class="layout">
+        <section class="card" aria-labelledby="controls-heading">
+          <h2 id="controls-heading">Search &amp; Filters</h2>
+          <div class="controls-group">
+            <div>
+              <label for="searchTitle">Search by title</label>
+              <div class="inline-controls">
+                <input
+                  type="text"
+                  id="searchTitle"
+                  placeholder="e.g. JavaScript"
+                />
+                <button type="button" class="primary" id="searchTitleButton">
+                  Search
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label for="categorySelect">Filter by category</label>
+              <div class="inline-controls">
+                <select id="categorySelect">
+                  <option value="">Choose a category</option>
+                  <option value="Programming">Programming</option>
+                  <option value="Database">Database</option>
+                  <option value="Science">Science</option>
+                  <option value="Fiction">Fiction</option>
+                  <option value="Other">Other</option>
+                </select>
+                <button type="button" class="ghost" id="filterCategoryButton">
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls-group">
+            <label>Sort &amp; Top rated</label>
+            <div class="inline-controls">
+              <button type="button" class="chip" id="sortPriceButton">
+                Sort by price
+              </button>
+              <button type="button" class="chip" id="sortRatingButton">
+                Sort by rating
+              </button>
+              <button type="button" class="chip" id="topRatedButton">
+                Top rated (rating ≥ 4)
+              </button>
+            </div>
+          </div>
+
+          <div class="controls-group">
+            <label>Pagination</label>
+            <p style="font-size: 0.85rem; color: #4b5563; margin-top: 0.1rem">
+              Uses
+              <code>skip(5)</code>
+              and
+              <code>limit(5)</code>
+              on page 2 as in the lab.
+            </p>
+            <div class="inline-controls">
+              <button type="button" class="ghost" id="loadPage1Button">
+                Page 1
+              </button>
+              <button type="button" class="ghost" id="loadPage2Button">
+                Page 2
+              </button>
+              <button type="button" class="ghost" id="loadNextPageButton">
+                Next page
+              </button>
+            </div>
+          </div>
+
+          <div class="status" id="booksStatus" aria-live="polite"></div>
+        </section>
+
+        <section class="card" aria-labelledby="results-heading">
+          <div class="books-header">
+            <h2 id="results-heading">Results</h2>
+            <div>
+              <span class="badge" id="resultsBadge">0 books</span>
+            </div>
+          </div>
+          <div id="booksContainer" class="books-list"></div>
+          <div class="pagination">
+            <span id="paginationInfo"></span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="js/books.js"></script>
+  </body>
+  </html>
+

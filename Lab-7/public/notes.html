@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student Notes Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f7fb;
+        color: #1f2933;
+      }
+
+      header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.3);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      header p {
+        margin: 0.25rem 0 0;
+        opacity: 0.9;
+      }
+
+      main {
+        max-width: 960px;
+        margin: 1.5rem auto 2rem;
+        padding: 0 1rem;
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.2rem;
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .field {
+        flex: 1 1 220px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #4b5563;
+      }
+
+      input[type='text'],
+      textarea {
+        padding: 0.5rem 0.6rem;
+        border-radius: 0.5rem;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      input[type='text']:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-start;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+
+      button {
+        border-radius: 999px;
+        border: none;
+        padding: 0.55rem 1.2rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.05s ease,
+          box-shadow 0.15s ease;
+      }
+
+      button.primary {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4);
+      }
+
+      button.primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
+
+      button.secondary {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      button.secondary:hover {
+        background: #d1d5db;
+      }
+
+      button.danger {
+        background: #ef4444;
+        color: #ffffff;
+      }
+
+      button.danger:hover {
+        background: #dc2626;
+      }
+
+      .notes-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+
+      .note {
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .note-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+
+      .note-title {
+        font-weight: 600;
+      }
+
+      .note-subject {
+        font-size: 0.85rem;
+        color: #6366f1;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .note-description {
+        font-size: 0.9rem;
+        color: #4b5563;
+      }
+
+      .note-date {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .note-actions {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 500;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-top: 0.5rem;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding-inline: 1.25rem;
+        }
+
+        main {
+          padding-inline: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Student Notes Manager</h1>
+      <p>Create, view, update and delete your study notes (MongoDB CRUD).</p>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="add-note-heading">
+        <h2 id="add-note-heading">Add / Edit Note</h2>
+        <div class="status" id="statusMessage" aria-live="polite"></div>
+        <form id="noteForm">
+          <input type="hidden" id="noteId" />
+          <div class="form-row">
+            <div class="field">
+              <label for="title">Title</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="MongoDB Basics"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="subject">Subject</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                placeholder="Database"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Introduction to MongoDB concepts"
+              required
+            ></textarea>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary" id="submitButton">
+              Add Note
+            </button>
+            <button
+              type="button"
+              class="secondary"
+              id="cancelEditButton"
+              style="display: none"
+            >
+              Cancel Edit
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="note-header" style="margin-bottom: 0.5rem">
+          <h2>All Notes</h2>
+          <span class="pill" id="noteCountPill">0 notes</span>
+        </div>
+        <div id="notesContainer" class="notes-list"></div>
+      </section>
+    </main>
+
+    <script src="js/notes.js"></script>
+  </body>
+  </html>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student Notes Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f7fb;
+        color: #1f2933;
+      }
+
+      header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.3);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      header p {
+        margin: 0.25rem 0 0;
+        opacity: 0.9;
+      }
+
+      main {
+        max-width: 960px;
+        margin: 1.5rem auto 2rem;
+        padding: 0 1rem;
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.2rem;
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .field {
+        flex: 1 1 220px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #4b5563;
+      }
+
+      input[type='text'],
+      textarea {
+        padding: 0.5rem 0.6rem;
+        border-radius: 0.5rem;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      input[type='text']:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-start;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+
+      button {
+        border-radius: 999px;
+        border: none;
+        padding: 0.55rem 1.2rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.05s ease,
+          box-shadow 0.15s ease;
+      }
+
+      button.primary {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4);
+      }
+
+      button.primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
+
+      button.secondary {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      button.secondary:hover {
+        background: #d1d5db;
+      }
+
+      button.danger {
+        background: #ef4444;
+        color: #ffffff;
+      }
+
+      button.danger:hover {
+        background: #dc2626;
+      }
+
+      .notes-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+
+      .note {
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .note-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+
+      .note-title {
+        font-weight: 600;
+      }
+
+      .note-subject {
+        font-size: 0.85rem;
+        color: #6366f1;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .note-description {
+        font-size: 0.9rem;
+        color: #4b5563;
+      }
+
+      .note-date {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .note-actions {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 500;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-top: 0.5rem;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding-inline: 1.25rem;
+        }
+
+        main {
+          padding-inline: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Student Notes Manager</h1>
+      <p>Create, view, update and delete your study notes (MongoDB CRUD).</p>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="add-note-heading">
+        <h2 id="add-note-heading">Add / Edit Note</h2>
+        <div class="status" id="statusMessage" aria-live="polite"></div>
+        <form id="noteForm">
+          <input type="hidden" id="noteId" />
+          <div class="form-row">
+            <div class="field">
+              <label for="title">Title</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="MongoDB Basics"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="subject">Subject</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                placeholder="Database"
+                required
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Introduction to MongoDB concepts"
+              required
+            ></textarea>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary" id="submitButton">
+              Add Note
+            </button>
+            <button
+              type="button"
+              class="secondary"
+              id="cancelEditButton"
+              style="display: none"
+            >
+              Cancel Edit
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="note-header" style="margin-bottom: 0.5rem">
+          <h2>All Notes</h2>
+          <span class="pill" id="noteCountPill">0 notes</span>
+        </div>
+        <div id="notesContainer" class="notes-list"></div>
+      </section>
+    </main>
+
+    <script src="js/notes.js"></script>
+  </body>
+  </html>
+
