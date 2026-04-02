@@ -1,0 +1,45 @@
+@import "../shared.css";
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.student-card {
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 22px;
+}
+
+.student-card h2 {
+  margin: 0 0 14px;
+  color: #9a3412;
+  font-size: 1.5rem;
+}
+
+.student-card p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  margin: 0;
+  border-bottom: 1px solid #ffedd5;
+}
+
+.student-card p:last-child {
+  border-bottom: 0;
+}
+
+.student-card span {
+  font-weight: 700;
+  color: #7c2d12;
+}
+
+@media (max-width: 640px) {
+  .student-card p {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

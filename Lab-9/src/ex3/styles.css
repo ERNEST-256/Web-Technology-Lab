@@ -1,0 +1,59 @@
+@import "../shared.css";
+
+.counter-panel {
+  text-align: center;
+}
+
+.counter-box {
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.counter-label {
+  margin: 0;
+  font-weight: 700;
+  color: #7c2d12;
+}
+
+.counter-box h2 {
+  margin: 10px 0 18px;
+  font-size: 4rem;
+  color: #9a3412;
+}
+
+.counter-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.counter-actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #fdba74;
+  color: #431407;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.counter-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(194, 65, 12, 0.18);
+}
+
+.counter-actions .primary-button {
+  background: #ea580c;
+  color: #fff7ed;
+}
+
+@media (max-width: 640px) {
+  .counter-box h2 {
+    font-size: 3.2rem;
+  }
+}
