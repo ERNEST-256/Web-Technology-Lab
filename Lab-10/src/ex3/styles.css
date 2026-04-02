@@ -1,0 +1,63 @@
+@import "../shared.css";
+
+.status-box {
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  font-weight: 700;
+}
+
+.status-box.loading {
+  background: #ccfbf1;
+  color: #115e59;
+}
+
+.status-box.error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-box.empty {
+  background: #ecfeff;
+  color: #155e75;
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.post-card {
+  background: #ffffff;
+  border: 1px solid #99f6e4;
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.post-card .pill {
+  background: #ccfbf1;
+  color: #115e59;
+  margin-bottom: 14px;
+}
+
+.post-card h2 {
+  margin: 0 0 12px;
+  color: #134e4a;
+  font-size: 1.2rem;
+  text-transform: capitalize;
+}
+
+.post-card p {
+  margin: 0 0 10px;
+  color: #415161;
+  line-height: 1.6;
+}
+
+.post-card p:last-child {
+  margin-bottom: 0;
+}
+
+.post-card strong {
+  color: #134e4a;
+}

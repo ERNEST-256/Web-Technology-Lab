@@ -1,0 +1,58 @@
+@import "../shared.css";
+
+.form-card {
+  display: grid;
+  gap: 18px;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #99f6e4;
+  border-radius: 22px;
+}
+
+.form-card label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+  color: #115e59;
+}
+
+.form-card input {
+  width: 100%;
+  border: 1px solid #99d5ca;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #f8fffd;
+  color: #19212b;
+}
+
+.form-card input:focus {
+  outline: 2px solid #5eead4;
+  border-color: #14b8a6;
+}
+
+.form-card button {
+  border: none;
+  border-radius: 999px;
+  padding: 13px 20px;
+  background: #0f766e;
+  color: #f0fdfa;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.success-banner {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ccfbf1;
+  color: #115e59;
+  font-weight: 700;
+}
