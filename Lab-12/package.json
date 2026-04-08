@@ -1,0 +1,16 @@
+{
+  "name": "lab-12-nodejs-advanced",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "Ex-1.js",
+  "scripts": {
+    "ex1": "node Ex-1.js",
+    "ex2": "node Ex-2.js",
+    "ex3": "node Ex-3.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^8.19.2"
+  }
+}
